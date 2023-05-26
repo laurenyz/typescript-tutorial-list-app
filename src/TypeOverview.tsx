@@ -55,3 +55,5 @@ let printName1: (name: string) => never // doesn't return anything
 function printName2(name: string){
   console.log(name)
 }
+
+// When installing libraries, need to install types too (click DT next to library name in npm)

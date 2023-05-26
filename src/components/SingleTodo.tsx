@@ -3,14 +3,16 @@ import { Todo } from '../model'
 import { AiFillEdit, AiFillDelete } from "react-icons/ai"
 import { MdDone } from "react-icons/md"
 import "./styles.css"
+import { Draggable } from 'react-beautiful-dnd'
 
 interface Props {
     todo: Todo;
     todos: Todo[];
     setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
+    index: number;
 }
 
-const SingleTodo: React.FC<Props> = ({todo, todos, setTodos}) => {
+const SingleTodo: React.FC<Props> = ({todo, todos, setTodos, index}) => {
     const [editMode, setEditMode] = useState<boolean>(false)
     const [editTodoText, setEditTodoText] = useState<string>(todo.todo)
     const editInputRef = useRef<HTMLInputElement>(null)
@@ -34,43 +36,53 @@ const SingleTodo: React.FC<Props> = ({todo, todos, setTodos}) => {
     }
 
   return (
-    <form className="todos__single" onSubmit={(e)=>handleEdit(e, todo.id)}>
-        {
-            editMode
-            ?
-                <input 
-                    ref={editInputRef}
-                    className='todos__single--text'
-                    value={editTodoText} 
-                    onChange={(e)=> setEditTodoText(e.target.value)}
-                />
-            :
-                todo.isDone
-                ?
-                    <s className="todos__single--text">
-                        {todo.todo}
-                    </s>
-                :
-                    <span className="todos__single--text">
-                        {todo.todo}
-                    </span>
-        }
-        <div>
-            <span className="icon" onClick={() =>{
-                if(!editMode && !todo.isDone){
-                    setEditMode(true)
+    <Draggable draggableId={todo.id.toString()} index={index}>
+        {(provided, snapshot) =>(
+            <form 
+                className={`todos__single ${snapshot.isDragging?'drag':''}`} 
+                onSubmit={(e)=>handleEdit(e, todo.id)}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+                ref={provided.innerRef}
+            >
+                {
+                    editMode
+                    ?
+                        <input 
+                            ref={editInputRef}
+                            className='todos__single--text'
+                            value={editTodoText} 
+                            onChange={(e)=> setEditTodoText(e.target.value)}
+                        />
+                    :
+                        todo.isDone
+                        ?
+                            <s className="todos__single--text">
+                                {todo.todo}
+                            </s>
+                        :
+                            <span className="todos__single--text">
+                                {todo.todo}
+                            </span>
                 }
-            }}>
-                <AiFillEdit />
-            </span>
-            <span className="icon" onClick={()=>handleDelete(todo.id)}>
-                <AiFillDelete />
-            </span>
-            <span className="icon" onClick={()=>handleDone(todo.id)}>
-                <MdDone />
-            </span>
-        </div>
-    </form>
+                <div>
+                    <span className="icon" onClick={() =>{
+                        if(!editMode && !todo.isDone){
+                            setEditMode(true)
+                        }
+                    }}>
+                        <AiFillEdit />
+                    </span>
+                    <span className="icon" onClick={()=>handleDelete(todo.id)}>
+                        <AiFillDelete />
+                    </span>
+                    <span className="icon" onClick={()=>handleDone(todo.id)}>
+                        <MdDone />
+                    </span>
+                </div>
+            </form>
+        )}
+    </Draggable>
   )
 }
 
